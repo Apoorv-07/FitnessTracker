@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silent Levelling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .bg-gradient {
+        background: linear-gradient(135deg, #4f46e5, #9333ea);
+      }
+
+      .elegant-button {
+        background-color: #9333ea;
+        border-radius: 1.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1.125rem;
+        font-weight: bold;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+      }
+
+      .elegant-button:hover {
+        background-color: #6b21a8;
+        transform: scale(1.05);
+      }
+
+      .input-field {
+        background-color: #1e293b;
+        color: white;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid #4f46e5;
+        font-size: 1rem;
+      }
+
+      .input-field:focus {
+        outline: none;
+        border-color: #9333ea;
+        box-shadow: 0 0 5px rgba(147, 51, 234, 0.7);
+      }
+
+      .section-header {
+        color: #9333ea;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .card {
+        background-color: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.4);
+      }
+
+      .xp-bar {
+        background-color: #6b21a8;
+        height: 1rem;
+        border-radius: 9999px;
+        overflow: hidden;
+      }
+
+      .xp-fill {
+        background-color: #9333ea;
+        height: 100%;
+        width: 60%;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-white min-h-screen flex flex-col">
+    <header class="bg-gradient p-4 text-white shadow-lg flex items-center justify-between px-8">
+      <div class="text-2xl font-bold">Silent Levelling</div>
+    </header>
+
+    <main class="flex-1 max-w-4xl mx-auto p-6 space-y-8">
+      <!-- Player Info -->
+      <section class="card">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-4">
+            <img id="profile-pic" src="https://api.dicebear.com/7.x/adventurer/svg?seed=placeholder" alt="Profile" class="w-24 h-24 rounded-full border-4 border-indigo-600" />
+            <div>
+              <div class="text-2xl font-bold" id="display-name">Player</div>
+              <div class="text-sm">Level <span id="display-level">1</span> - XP: <span id="display-xp">0</span></div>
+              <div class="text-sm">Age: <span id="display-age">20</span> | Weight: <span id="display-weight">70</span> kg</div>
+            </div>
+          </div>
+          <button class="elegant-button" onclick="toggleEditUser()">Edit</button>
+        </div>
+
+        <div id="edit-user-form" class="hidden space-y-4">
+          <input type="text" id="edit-name" class="input-field w-full" placeholder="Name">
+          <input type="number" id="edit-age" class="input-field w-full" placeholder="Age">
+          <input type="number" id="edit-weight" class="input-field w-full" placeholder="Weight">
+          <input type="number" id="edit-xp" class="input-field w-full" placeholder="XP">
+          <input type="number" id="edit-level" class="input-field w-full" placeholder="Level">
+          <select id="edit-pic" class="input-field w-full">
+            <option value="https://api.dicebear.com/7.x/adventurer/svg?seed=placeholder">Default</option>
+            <option value="https://api.dicebear.com/7.x/adventurer/svg?seed=Mystic">Mystic</option>
+            <option value="https://api.dicebear.com/7.x/adventurer/svg?seed=Hero">Hero</option>
+            <option value="https://api.dicebear.com/7.x/adventurer/svg?seed=Sage">Sage</option>
+          </select>
+          <button class="elegant-button w-full" onclick="saveUserDetails()">Save</button>
+        </div>
+      </section>
+
+      <!-- Skills Section -->
+      <section class="card">
+        <h2 class="section-header mb-4">Skills</h2>
+        <ul id="skills-list" class="space-y-2 list-disc list-inside">
+          <li>Shadow Step</li>
+          <li>Mana Sense</li>
+          <li>Iron Body</li>
+        </ul>
+        <div class="mt-6">
+          <label for="new-skill" class="block text-xl text-gray-300 mb-3">Add New Skill</label>
+          <input type="text" id="new-skill" class="input-field w-full" placeholder="e.g. Sword Slash">
+          <button class="mt-4 elegant-button w-full" onclick="addSkill()">Add Skill</button>
+        </div>
+      </section>
+
+      <!-- XP Bar -->
+      <div class="card">
+        <div class="text-lg font-semibold mb-2">Experience</div>
+        <div class="xp-bar">
+          <div class="xp-fill" id="xp-fill-bar"></div>
+        </div>
+      </div>
+
+      <!-- Quest List Section -->
+      <section class="card">
+        <h2 class="section-header mb-4">Quests</h2>
+        <ul id="quest-list" class="space-y-3">
+          <li><label><input type="checkbox" onclick="completeTask(this, 10)"> Rebuild Thyself</label></li>
+          <li><label><input type="checkbox" onclick="completeTask(this, 15)"> Hit Protein Target</label></li>
+          <li><label><input type="checkbox" onclick="completeTask(this, 20)"> Mindset Journal</label></li>
+        </ul>
+        <div class="mt-6">
+          <label for="new-quest" class="block text-xl text-gray-300 mb-3">Add New Quest</label>
+          <input type="text" id="new-quest" class="input-field w-full" placeholder="e.g. shadow-training">
+          <button class="mt-4 elegant-button w-full" onclick="addQuest()">Add Quest</button>
+        </div>
+      </section>
+
+      <!-- New Day Button -->
+      <div class="card">
+        <button class="elegant-button w-full" onclick="startNewDay()">New Day</button>
+      </div>
+
+      <!-- Journal Section -->
+      <section class="card">
+        <h2 class="section-header mb-4">Daily Journal</h2>
+        <textarea class="input-field w-full h-32" placeholder="Write your daily review here..."></textarea>
+      </section>
+    </main>
+
+    <footer class="bg-slate-900 text-center p-8 border-t border-indigo-600">
+      <div class="text-sm text-gray-400">CC: © 2025 Arcus Smith</div>
+    </footer>
+
+    <script>
+      let currentXP = 0;
+
+      function toggleEditUser() {
+        document.getElementById("edit-user-form").classList.toggle("hidden");
+      }
+
+      function saveUserDetails() {
+        const name = document.getElementById("edit-name").value;
+        const age = document.getElementById("edit-age").value;
+        const weight = document.getElementById("edit-weight").value;
+        const xp = document.getElementById("edit-xp").value;
+        const level = document.getElementById("edit-level").value;
+        const pic = document.getElementById("edit-pic").value;
+
+        if (name) document.getElementById("display-name").textContent = name;
+        if (age) document.getElementById("display-age").textContent = age;
+        if (weight) document.getElementById("display-weight").textContent = weight;
+        if (xp) {
+          currentXP = parseInt(xp);
+          document.getElementById("display-xp").textContent = currentXP;
+          document.getElementById("xp-fill-bar").style.width = Math.min(currentXP, 100) + "%";
+        }
+        if (level) document.getElementById("display-level").textContent = level;
+        if (pic) document.getElementById("profile-pic").src = pic;
+
+        document.getElementById("edit-user-form").classList.add("hidden");
+      }
+
+      function completeTask(checkbox, xp) {
+        if (checkbox.checked) {
+          currentXP += xp;
+          document.getElementById("display-xp").textContent = currentXP;
+          document.getElementById("xp-fill-bar").style.width = Math.min(currentXP, 100) + "%";
+          checkbox.disabled = true;
+        }
+      }
+
+      function addQuest() {
+        const quest = document.getElementById("new-quest").value.trim();
+        if (!quest) return;
+        const ul = document.getElementById("quest-list");
+        const li = document.createElement("li");
+        li.innerHTML = `<label><input type="checkbox" onclick="completeTask(this, 10)"> ${quest.replace(/-/g, ' ')}</label>`;
+        ul.appendChild(li);
+        document.getElementById("new-quest").value = "";
+      }
+
+      function addSkill() {
+        const skill = document.getElementById("new-skill").value.trim();
+        if (!skill) return;
+        const ul = document.getElementById("skills-list");
+        const li = document.createElement("li");
+        li.textContent = skill;
+        ul.appendChild(li);
+        document.getElementById("new-skill").value = "";
+      }
+
+      function startNewDay() {
+        document.querySelector("textarea").value = "";
+        const checkboxes = document.querySelectorAll("#quest-list input[type='checkbox']");
+        checkboxes.forEach(cb => {
+          cb.checked = false;
+          cb.disabled = false;
+        });
+      }
+    </script>
+  </body>
+</html>
